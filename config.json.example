@@ -1,0 +1,19 @@
+{
+  "Nickname": "somenick",
+  "Username": "someuser",
+  "Server": "irc.freenode.net",
+  "Port": 6697,
+  "TLS": true,
+  "TLSSkipVerify": false,
+  "Debug": false,
+  "Verbose": true,
+  "Channels" : [
+    {
+      "Name": "#foo"
+    },
+    {
+      "Name": "#bar",
+      "Key": "secretkey"
+    }
+  ]
+}

@@ -3,6 +3,11 @@ package main
 import (
 	"crypto/tls"
 	"log"
+	"bytes"
+	"os/exec"
+	"strings"
+	"path/filepath"
+	"path"
 	"strconv"
 	"net/http"
 	"flag"
@@ -78,6 +83,7 @@ func main() {
 		}
 	})
 
+	// Read messages said on IRC by other users
 	i.AddCallback("PRIVMSG", func(e *irc.Event) {
 		var message = e.Message()
 		var nick = e.Nick
@@ -87,6 +93,27 @@ func main() {
 		}
 		log.Print("Received [" + message + "] on [" +
 			sender + "] from [" + nick + "] on IRC")
+
+		// Check if the message begins with !, which is a command
+		if string([]rune(message)[0]) == "!" {
+
+			// Split the command and the arguments
+			var command =  strings.Fields(message)[0]
+			var args = strings.Fields(message)[1:]
+
+			// Remove the ! from the command
+			command = command[1:]
+
+			// Execute the command
+			out, err := Execute(command, args)
+			if err != nil {
+				l.Print("Unable to execute command: ", err)
+			}
+			if out != "" {
+				l.Print("Result: " + out)
+				i.Privmsg(sender, out)
+			}
+		}
 	})
 
 	router := mux.NewRouter()
@@ -153,13 +180,6 @@ func APIHandler(w http.ResponseWriter, r *http.Request, ch chan IRCPrivMsg) {
     		return
     	}
 
-	//target := r.FormValue("target")
-    	//if target == "" {
-	//	l.Print("Unable to read target form value")
-	//	http.Error(w, "Unable to read *target* from the form data", 400)
-    	//	return
-    	//}
-
 	m := IRCPrivMsg {}
 	m.Target = target
 	m.Message = message
@@ -168,8 +188,10 @@ func APIHandler(w http.ResponseWriter, r *http.Request, ch chan IRCPrivMsg) {
 	// Send the message back through the channel
 	ch <- m
 
-	l.Print("Sent [" + message + "] to [" + target + "] via HTTP")
-	http.Error(w, "Message [" + message + "] sent to [" + target + "]", 200)
+	l.Print("Sent [" + message + "] to " + target_type + " [" + target +
+		"] via HTTP")
+	http.Error(w, "Message [" + message + "] sent to " + target_type +
+		" [" + target + "]", 200)
 	return
 }
 
@@ -177,4 +199,22 @@ func APIHandler(w http.ResponseWriter, r *http.Request, ch chan IRCPrivMsg) {
 func APIIndex(w http.ResponseWriter, r *http.Request, ch chan IRCPrivMsg) {
 	http.Error(w, "POST to /{channel,user}/{$channel,$username}/{action,privmsg} with the form data {message} set", 200)
 	return
+}
+
+func Execute(c string, args []string) (string, error) {
+	var err error
+
+	// Extract the last element of the path (filename) to make it slightly
+	// more safe.
+	c = path.Base(c)
+	
+	// Assemble the path to the script to execute
+	command := filepath.Join(cfg.CommandDirectory, c)
+
+        log.Print("Executing command: [", command, " ", strings.Join(args, " "), "]")
+        cmd := exec.Command(command, args...)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err = cmd.Run()
+        return out.String(), err
 }

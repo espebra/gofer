@@ -68,3 +68,15 @@ The following will print the ACTION *zoo* as a private message to the user *qux*
 ```
 $ curl -d "message=zoo" http://localhost:8080/user/qux/action
 ```
+
+## Command execution
+
+Potentially dangerous. IRC messages on the following syntax are turned into commands:
+
+```
+!command arg1 arg2
+````
+
+``command`` needs to exist as an executable file in a directory ``CommandDirectory`` which is specified in the configuration file. The arguments ``arg1, arg2, ...`` are sent as arguments to the ``command``. The stdout is printed back on IRC.
+
+

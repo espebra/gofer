@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# Print the current time locally, or in a specific timezone
+#
+
+TZ="$1"
+if [ -z $TZ ]; then
+        date
+else
+        TZ="${TZ}" date
+fi
+

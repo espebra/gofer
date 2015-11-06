@@ -17,16 +17,17 @@ type Channel struct {
 }
 
 type Configuration struct {
-        Nickname	string  
-        Username	string  
-        Server          string  
-        Port            int     
-        TLS             bool    
-        TLSSkipVerify   bool    
-        Debug		bool    
-        Verbose		bool    
-        Channels        []Channel
-	HTTP		HTTP
+        Nickname		string  
+        Username		string  
+        Server          	string  
+        Port            	int     
+        TLS             	bool    
+        TLSSkipVerify   	bool    
+        Debug			bool    
+        Verbose			bool    
+        Channels        	[]Channel
+	HTTP			HTTP
+        CommandDirectory        string  
 }
 
 func (c *Configuration) Read(path string) error {

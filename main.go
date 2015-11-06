@@ -22,6 +22,7 @@ var l = log.New(os.Stdout, "", log.LstdFlags)
 type IRCPrivMsg struct {
 	Target		string
 	Message		string
+	Action		string
 }
 
 // Global channels
@@ -69,7 +70,11 @@ func main() {
 	// channels on IRC.
 	i.AddCallback("002", func(e *irc.Event) {
 		for n := range ch {
-			i.Privmsg(n.Target, n.Message)
+			if n.Action == "privmsg" {
+				i.Privmsg(n.Target, n.Message)
+			} else if n.Action == "action" {
+				i.Action(n.Target, n.Message)
+			}
 		}
 	})
 
@@ -86,7 +91,8 @@ func main() {
 
 	router := mux.NewRouter()
 	http.Handle("/", httpInterceptor(router))
-	router.HandleFunc("/", reqHandler(APIHandler)).Methods("POST")
+	router.HandleFunc("/", reqHandler(APIIndex)).Methods("HEAD", "GET")
+	router.HandleFunc("/{type}/{target}/{action}", reqHandler(APIHandler)).Methods("POST")
 
 	// Make sure we reconnect if disconnected. Not sure if this needs to
 	// be a goroutine.
@@ -113,6 +119,29 @@ func reqHandler(fn func (http.ResponseWriter, *http.Request, chan IRCPrivMsg)) h
 
 // Function that handles each of the incoming HTTP requests
 func APIHandler(w http.ResponseWriter, r *http.Request, ch chan IRCPrivMsg) {
+	vars := mux.Vars(r)
+	target_type := vars["type"]
+	target := vars["target"]
+	action := vars["action"]
+
+	if target_type == "channel" {
+		target = "#" + target
+	}
+
+	if target_type != "channel" && target_type != "user" {
+		l.Print("Invalid target type [" + target_type + "]")
+		http.Error(w, "Invalid target type. " +
+			"Valid types are [channel] and [user]", 400)
+    		return
+	}
+
+	if action != "privmsg" && action != "action" {
+		l.Print("Invalid target type [" + target_type + "]")
+		http.Error(w, "Invalid action. " +
+			"Valid actions are [privmsg] and [action]", 400)
+    		return
+	}
+
 	message := r.FormValue("message")
     	if message == "" {
 		l.Print("Unable to read message form value")
@@ -121,21 +150,28 @@ func APIHandler(w http.ResponseWriter, r *http.Request, ch chan IRCPrivMsg) {
     		return
     	}
 
-	target := r.FormValue("target")
-    	if target == "" {
-		l.Print("Unable to read target form value")
-		http.Error(w, "Unable to read *target* from the form data", 400)
-    		return
-    	}
+	//target := r.FormValue("target")
+    	//if target == "" {
+	//	l.Print("Unable to read target form value")
+	//	http.Error(w, "Unable to read *target* from the form data", 400)
+    	//	return
+    	//}
 
 	m := IRCPrivMsg {}
 	m.Target = target
 	m.Message = message
+	m.Action = action
 
 	// Send the message back through the channel
 	ch <- m
 
 	l.Print("Sent [" + message + "] to [" + target + "] via HTTP")
 	http.Error(w, "Message [" + message + "] sent to [" + target + "]", 200)
+	return
+}
+
+// Function that handles each of the incoming HTTP requests
+func APIIndex(w http.ResponseWriter, r *http.Request, ch chan IRCPrivMsg) {
+	http.Error(w, "POST to /{channel,user}/{$channel,$username}/{action,privmsg} with the form data {message} set", 200)
 	return
 }

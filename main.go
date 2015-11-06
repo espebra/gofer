@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"path"
 	"strconv"
+	"errors"
 	"net/http"
 	"flag"
 	"os"
@@ -207,6 +208,10 @@ func Execute(c string, args []string) (string, error) {
 	// Extract the last element of the path (filename) to make it slightly
 	// more safe.
 	c = path.Base(c)
+
+	if c == "." {
+		return "", errors.New("Empty command")
+	}
 	
 	// Assemble the path to the script to execute
 	command := filepath.Join(cfg.CommandDirectory, c)

@@ -82,6 +82,11 @@ Potentially dangerous. IRC messages on the following syntax are turned into comm
 It is one example command, ``time``, available in the scripts directory. It will allow IRC users to get the current time in a specified timezone:
 
 ```
-!time utc
+22:18:43   user | !time europe/moscow
+22:18:43  gofer | Sat Nov  7 00:18:43 MSK 2015
+22:19:22   user | !time
+22:19:22  gofer | Fri Nov  6 22:19:21 CET 2015
+22:19:40   user | !time utc
+22:19:40  gofer | Fri Nov  6 21:19:40 UTC 2015
 ```
 

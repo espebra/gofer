@@ -6,7 +6,7 @@
   "TLS": true,
   "TLSSkipVerify": false,
   "Debug": false,
-  "Verbose": true,
+  "Verbose": false,
   "Channels" : [
     {
       "Name": "#foo"
@@ -15,5 +15,9 @@
       "Name": "#bar",
       "Key": "secretkey"
     }
-  ]
+  ],
+  "HTTP": {
+    "Host": "127.0.0.1",
+    "Port": 8080
+  }
 }

@@ -5,7 +5,13 @@ import (
 	"os"
 )
 
+type HTTP struct {
+	Host		string
+	Port		int
+}
+
 type Channel struct {
+        Ch		chan string
         Name            string
         Key             string
 }
@@ -20,6 +26,7 @@ type Configuration struct {
         Debug		bool    
         Verbose		bool    
         Channels        []Channel
+	HTTP		HTTP
 }
 
 func (c *Configuration) Read(path string) error {

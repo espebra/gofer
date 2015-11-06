@@ -1,0 +1,15 @@
+[Unit]
+Description=Gofer
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/gofer --config /etc/gofer.json
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=gofer
+PrivateTmp=true
+User=gofer
+Group=gofer
+
+[Install]
+WantedBy=multi-user.target

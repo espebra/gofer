@@ -98,6 +98,9 @@ func main() {
 	// be a goroutine.
 	go i.Loop()
 
+	l.Print("Starting HTTP interface at " + cfg.HTTP.Host + ":" +
+		strconv.Itoa(cfg.HTTP.Port))
+
 	err = http.ListenAndServe(cfg.HTTP.Host + ":" + strconv.Itoa(cfg.HTTP.Port), nil)
 	if err != nil {
 		l.Fatal(err.Error())

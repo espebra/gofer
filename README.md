@@ -48,13 +48,13 @@ Some arguments commonly used to start ``gofer`` are:
 The following will print the PRIVMSG *foo* in the channel *#bar*.
 
 ```
-$ curl -d "message=foo" http://localhost:1337/channel/bar/privmsg
+$ curl -d "message=foo" http://localhost:8080/channel/bar/privmsg
 ```
 
 The following will print the ACTION *foo* in the channel *#bar*.
 
 ```
-$ curl -d "message=foo" http://localhost:1337/channel/bar/action
+$ curl -d "message=foo" http://localhost:8080/channel/bar/action
 ```
 
 The following will print the PRIVMSG *zoo* as a private message to the user *qux*.

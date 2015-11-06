@@ -79,4 +79,9 @@ Potentially dangerous. IRC messages on the following syntax are turned into comm
 
 ``command`` needs to exist as an executable file in a directory ``CommandDirectory`` which is specified in the configuration file. The arguments ``arg1, arg2, ...`` are sent as arguments to the ``command``. The stdout is printed back on IRC.
 
+It is one example command, ``time``, available in the scripts directory. It will allow IRC users to get the current time in a specified timezone:
+
+```
+!time utc
+```
 

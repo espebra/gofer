@@ -92,11 +92,15 @@ func main() {
 		if sender == i.GetNick() {
 			sender = "private message"
 		}
+
 		log.Print("Received [" + message + "] on [" +
 			sender + "] from [" + nick + "] on IRC")
 
+		// 2015/11/09 10:42:54 Received [bar foo zoo] on [#bar] from [someuser] on IRC
+		// 2015/11/09 10:43:03 Received [meh meh] on [private message] from [someuser] on IRC
+
 		// Check if the message begins with !, which is a command
-		if string([]rune(message)[0]) == "!" {
+		if string([]rune(message)[0]) == "!" && sender[0:1] == "#" {
 
 			// Split the command and the arguments
 			var command =  strings.Fields(message)[0]
@@ -106,7 +110,7 @@ func main() {
 			command = command[1:]
 
 			// Execute the command
-			out, err := Execute(command, args)
+			out, err := Execute(command, args, sender[1:])
 			if err != nil {
 				l.Print("Unable to execute command: ", err)
 			}
@@ -202,7 +206,7 @@ func APIIndex(w http.ResponseWriter, r *http.Request, ch chan IRCPrivMsg) {
 	return
 }
 
-func Execute(c string, args []string) (string, error) {
+func Execute(c string, args []string, channel string) (string, error) {
 	var err error
 
 	// Extract the last element of the path (filename) to make it slightly
@@ -214,7 +218,8 @@ func Execute(c string, args []string) (string, error) {
 	}
 	
 	// Assemble the path to the script to execute
-	command := filepath.Join(cfg.CommandDirectory, c)
+	// Add the channel as part of the path to enable different commands in different channels
+	command := filepath.Join(cfg.CommandDirectory, "channel", channel, c)
 
         log.Print("Executing command: [", command, " ", strings.Join(args, " "), "]")
         cmd := exec.Command(command, args...)

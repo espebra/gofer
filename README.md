@@ -43,7 +43,20 @@ Some arguments commonly used to start ``gofer`` are:
 ~/go/bin/gofer --config ~/gofer.json
 ```
 
-## HTTP interface
+## HTTP API interface
+
+### Say privmsg in specified channel
+
+|                       | Value                 	|
+| --------------------- | ----------------------------- |
+| **Method**            | POST				|
+| **URL**               | /channel/:channel/privmsg	|
+| **URL parameters**    | *None*                	|
+| **Success response**  | ``200``               	|
+| **Error response**    |                       	|
+| **Form data**         | *message=Some message text*	|
+
+###### Example
 
 The following will print the PRIVMSG *foo* in the channel *#bar*.
 
@@ -51,17 +64,56 @@ The following will print the PRIVMSG *foo* in the channel *#bar*.
 $ curl -d "message=foo" http://localhost:8080/channel/bar/privmsg
 ```
 
+### Say action in specified channel
+
+|                       | Value                 	|
+| --------------------- | ----------------------------- |
+| **Method**            | POST				|
+| **URL**               | /channel/:channel/action	|
+| **URL parameters**    | *None*                	|
+| **Success response**  | ``200``               	|
+| **Error response**    |                       	|
+| **Form data**         | *message=Some action text*	|
+
+###### Example
+
 The following will print the ACTION *foo* in the channel *#bar*.
 
 ```
 $ curl -d "message=foo" http://localhost:8080/channel/bar/action
 ```
 
+### Say privmsg to specified user
+
+|                       | Value                 	|
+| --------------------- | ----------------------------- |
+| **Method**            | POST				|
+| **URL**               | /user/:nickname/privmsg	|
+| **URL parameters**    | *None*                	|
+| **Success response**  | ``200``               	|
+| **Error response**    |                       	|
+| **Form data**         | *message=Some message text*	|
+
+###### Example
+
 The following will print the PRIVMSG *zoo* as a private message to the user *qux*.
 
 ```
 $ curl -d "message=zoo" http://localhost:8080/user/qux/privmsg
 ```
+
+### Say action to specified user
+
+|                       | Value                 	|
+| --------------------- | ----------------------------- |
+| **Method**            | POST				|
+| **URL**               | /user/:nickname/action	|
+| **URL parameters**    | *None*                	|
+| **Success response**  | ``200``               	|
+| **Error response**    |                       	|
+| **Form data**         | *message=Some action text*	|
+
+###### Example
 
 The following will print the ACTION *zoo* as a private message to the user *qux*.
 
@@ -77,9 +129,32 @@ Potentially dangerous. IRC messages on the following syntax are turned into comm
 !command arg1 arg2
 ````
 
-``command`` needs to exist as an executable file in a directory ``CommandDirectory`` which is specified in the configuration file. The arguments ``arg1, arg2, ...`` are sent as arguments to the ``command``. The stdout is printed back on IRC.
+``command`` needs to exist as an executable file in a given directory. The arguments ``arg1, arg2, ...`` are sent as arguments to the ``command``. Stdout is printed back on IRC.
 
-It is one example command, ``time``, available in the scripts directory. It will allow IRC users to get the current time in a specified timezone:
+The channel name is used as part of the path in the file system to the command that will be executed. This makes it possible to have different commands enabled in different channels.
+
+The ``CommandDirectory`` configuration option needs to point ot a directory. A given directory structure within this directory is required. Consider the following example configuration:
+
+```
+{
+    [...]
+    "CommandDirectory": "/usr/local/gofer/scripts/"
+    [...]
+}
+```
+
+The above configuration will require the directory structure which is created with the following commands:
+
+```
+$ sudo mkdir /usr/local/gofer/scripts
+$ sudo mkdir /usr/local/gofer/scripts/channel
+$ sudo mkdir /usr/local/gofer/scripts/channel/bar
+$ sudo mkdir /usr/local/gofer/scripts/channel/foo
+```
+
+The commands that should be enabled for the IRC channel ``#bar`` are copied or symlinked to ``/usr/local/gofer/scripts/channel/bar/``. Likewise for channel ``#foo``.
+
+One example command, ``time``, is available in the scripts directory in this repository. It will allow IRC users to get the current time in a specified timezone:
 
 ```
 22:18:43   user | !time europe/moscow

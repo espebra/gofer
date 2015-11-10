@@ -121,23 +121,27 @@ func main() {
 		}
 	})
 
+	go router()
+
+	// Make sure we reconnect if disconnected. Not sure if this needs to
+	// be a goroutine.
+	i.Loop()
+
+}
+
+func router() {
 	router := mux.NewRouter()
 	http.Handle("/", httpInterceptor(router))
 	router.HandleFunc("/", reqHandler(APIIndex)).Methods("HEAD", "GET")
 	router.HandleFunc("/{type}/{target}/{action}", reqHandler(APIHandler)).Methods("POST")
 
-	// Make sure we reconnect if disconnected. Not sure if this needs to
-	// be a goroutine.
-	go i.Loop()
-
 	l.Print("Starting HTTP interface at " + cfg.HTTP.Host + ":" +
 		strconv.Itoa(cfg.HTTP.Port))
 
-	err = http.ListenAndServe(cfg.HTTP.Host + ":" + strconv.Itoa(cfg.HTTP.Port), nil)
+	err := http.ListenAndServe(cfg.HTTP.Host + ":" + strconv.Itoa(cfg.HTTP.Port), nil)
 	if err != nil {
 		l.Fatal(err.Error())
 	}
-
 }
 
 func httpInterceptor(router http.Handler) http.Handler {

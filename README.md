@@ -23,8 +23,6 @@ Download and install ``gofer``. The binary will be created as ``~/go/bin/gofer``
 
 ```
 $ go get github.com/espebra/gofer
-$ cd src/github.com/espebra/gofer
-$ go install
 ```
 
 Copy ``~/go/src/github.com/espebra/gofer/config.json.example`` to ``~/.gofer.json`` and modify it to fit your needs.

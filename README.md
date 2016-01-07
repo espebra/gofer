@@ -129,11 +129,14 @@ The channel name is used as part of the path in the file system to the command t
 
 Example:
 
-On the channel *#foo*, the user *bar* says *Something is weird with #1337!*. The bot will then look into the directory ``scripts/#foo/`` (``scripts`` set by the ``ScriptDirectory`` configuration option) and iterate over the files there. It will execute each of the files as:
+On the channel *#foo*, the user *bar* says *Something is weird with #1337!*. The bot will then look into the directory ``scripts/#foo/`` (``scripts`` set by the ``ScriptDirectory`` configuration option) and iterate over the files there. The files will be executed as follows:
 
 ```
-scripts/#foo/filename "bar" "Something is weird with #1337!"
+scripts/#foo/script1 "bar" "Something is weird with #1337!"
+scripts/#foo/script2 "bar" "Something is weird with #1337!"
 ```
+
+It's up to each script to parse the message and decide if they have anything relevant to say about it. If the exit code is 0 and some output is printed, the output is printed to IRC. Multi line output is supported.
 
 The ``ScriptDirectory`` configuration option needs to point to a directory. A given directory structure within this directory is required. Consider the following example configuration:
 
@@ -154,5 +157,3 @@ $ sudo mkdir /usr/local/gofer/scripts/#anotherchannel
 ```
 
 The commands that should be enabled for the IRC channel ``#foo`` are copied or symlinked to ``/usr/local/gofer/scripts/#foo/``. Likewise for channel ``#anotherchannel``.
-
-The commands must exit with 0 for the output to be printed to IRC. Multi line output is supported.

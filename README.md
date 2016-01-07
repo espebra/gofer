@@ -123,22 +123,22 @@ $ curl -d "message=zoo" http://localhost:8080/user/qux/action
 
 ## Command execution
 
-Potentially dangerous. IRC messages on the following syntax are turned into commands:
+Potentially dangerous.
 
-```
-!command arg1 arg2
-````
-
-``command`` needs to exist as an executable file in a given directory. The arguments ``arg1, arg2, ...`` are sent as arguments to the ``command``. Stdout is printed back on IRC.
+The bot will listen for private messages and messages on any channel it has joined. For each message, the bot will iterate over files in a directory specific for that channel and execute them with the sender nick name and the message as arguments.
 
 The channel name is used as part of the path in the file system to the command that will be executed. This makes it possible to have different commands enabled in different channels.
 
-The ``CommandDirectory`` configuration option needs to point ot a directory. A given directory structure within this directory is required. Consider the following example configuration:
+Example:
+
+On the channel #foo, the user bar says "Something is weird with #1337!". The bot will then look into the directory ``scripts/#foo/`` (**scripts** set by the **ScriptDirectory** configuration options) and iterate over the files there. It will execute each of the files as ``scripts/#foo/filename "bar" "Something is weird with #1337!"``.
+
+The ``ScriptDirectory`` configuration option needs to point ot a directory. A given directory structure within this directory is required. Consider the following example configuration:
 
 ```
 {
     [...]
-    "CommandDirectory": "/usr/local/gofer/scripts/"
+    "ScriptDirectory": "/usr/local/gofer/scripts/"
     [...]
 }
 ```
@@ -147,21 +147,10 @@ The above configuration will require the directory structure which is created wi
 
 ```
 $ sudo mkdir /usr/local/gofer/scripts
-$ sudo mkdir /usr/local/gofer/scripts/channel
-$ sudo mkdir /usr/local/gofer/scripts/channel/bar
-$ sudo mkdir /usr/local/gofer/scripts/channel/foo
+$ sudo mkdir /usr/local/gofer/scripts/#foo
+$ sudo mkdir /usr/local/gofer/scripts/#anotherchannel
 ```
 
-The commands that should be enabled for the IRC channel ``#bar`` are copied or symlinked to ``/usr/local/gofer/scripts/channel/bar/``. Likewise for channel ``#foo``.
+The commands that should be enabled for the IRC channel ``#foo`` are copied or symlinked to ``/usr/local/gofer/scripts/#foo/``. Likewise for channel ``#anotherchannel``.
 
-One example command, ``time``, is available in the scripts directory in this repository. It will allow IRC users to get the current time in a specified timezone:
-
-```
-22:18:43   user | !time europe/moscow
-22:18:43  gofer | Sat Nov  7 00:18:43 MSK 2015
-22:19:22   user | !time
-22:19:22  gofer | Fri Nov  6 22:19:21 CET 2015
-22:19:40   user | !time utc
-22:19:40  gofer | Fri Nov  6 21:19:40 UTC 2015
-```
-
+The commands must exit with 0 for the output to be printed to IRC. Multi line output is supported.

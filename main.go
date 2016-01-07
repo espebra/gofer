@@ -3,13 +3,14 @@ package main
 import (
 	"crypto/tls"
 	"log"
+	"io/ioutil"
 	"bytes"
 	"os/exec"
 	"strings"
 	"path/filepath"
-	"path"
+	//"path"
 	"strconv"
-	"errors"
+	//"errors"
 	"net/http"
 	"flag"
 	"os"
@@ -88,35 +89,45 @@ func main() {
 	i.AddCallback("PRIVMSG", func(e *irc.Event) {
 		var message = e.Message()
 		var nick = e.Nick
-		var sender = e.Arguments[0]
-		if sender == i.GetNick() {
-			sender = "private message"
+		var channel = e.Arguments[0]
+		if channel == i.GetNick() {
+			channel = "private message"
 		}
 
 		log.Print("Received [" + message + "] on [" +
-			sender + "] from [" + nick + "] on IRC")
+			channel + "] from [" + nick + "] on IRC")
 
 		// 2015/11/09 10:42:54 Received [bar foo zoo] on [#bar] from [someuser] on IRC
 		// 2015/11/09 10:43:03 Received [meh meh] on [private message] from [someuser] on IRC
 
-		// Check if the message begins with !, which is a command
-		if string([]rune(message)[0]) == "!" && sender[0:1] == "#" {
-
-			// Split the command and the arguments
-			var command =  strings.Fields(message)[0]
-			var args = strings.Fields(message)[1:]
-
-			// Remove the ! from the command
-			command = command[1:]
-
-			// Execute the command
-			out, err := Execute(command, args, sender[1:])
-			if err != nil {
-				l.Print("Unable to execute command: ", err)
+		// Execute commands
+		dir := filepath.Join(cfg.ScriptDirectory, channel)
+		files, err := ioutil.ReadDir(dir)
+		if err != nil {
+			if cfg.Verbose {
+				l.Print("Unable to list scripts: ", err)
 			}
-			if out != "" {
-				l.Print("Result: " + out)
-				i.Privmsg(sender, out)
+		}
+		for _, f := range files {
+			if cfg.Verbose {
+				l.Print("Found script: " + f.Name())
+			}
+
+			script := filepath.Join(dir, f.Name())
+			response, err := Execute(script, nick, message)
+			if err != nil {
+				l.Print("Unable to execute command (" + script + " \"" + nick + "\" \"" + message + "\"]: " , err)
+			}
+			if response != "" && err == nil {
+				// Split the response into multiple lines
+				// if it was multiline
+				r := strings.Split(response, "\n")
+				for _, msg := range r {
+					if msg != "" {
+						l.Print("Result [" + script + "]: " + msg)
+						i.Privmsg(channel, msg)
+					}
+				}
 			}
 		}
 	})
@@ -210,23 +221,13 @@ func APIIndex(w http.ResponseWriter, r *http.Request, ch chan IRCPrivMsg) {
 	return
 }
 
-func Execute(c string, args []string, channel string) (string, error) {
+func Execute(command string, nick string, message string) (string, error) {
 	var err error
 
-	// Extract the last element of the path (filename) to make it slightly
-	// more safe.
-	c = path.Base(c)
-
-	if c == "." {
-		return "", errors.New("Empty command")
+	if cfg.Verbose {
+        	l.Print("Executing command: [" + command + " \"" + nick + "\" \"" + message + "\"]")
 	}
-	
-	// Assemble the path to the script to execute
-	// Add the channel as part of the path to enable different commands in different channels
-	command := filepath.Join(cfg.CommandDirectory, "channel", channel, c)
-
-        log.Print("Executing command: [", command, " ", strings.Join(args, " "), "]")
-        cmd := exec.Command(command, args...)
+        cmd := exec.Command(command, nick, message)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err = cmd.Run()

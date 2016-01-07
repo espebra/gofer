@@ -131,7 +131,7 @@ The channel name is used as part of the path in the file system to the command t
 
 Example:
 
-On the channel #foo, the user bar says "Something is weird with #1337!". The bot will then look into the directory ``scripts/#foo/`` (``scripts`` set by the ``ScriptDirectory`` configuration options) and iterate over the files there. It will execute each of the files as:
+On the channel *#foo*, the user *bar* says *Something is weird with #1337!*. The bot will then look into the directory ``scripts/#foo/`` (``scripts`` set by the ``ScriptDirectory`` configuration options) and iterate over the files there. It will execute each of the files as:
 
 ```
 scripts/#foo/filename "bar" "Something is weird with #1337!"

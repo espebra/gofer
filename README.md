@@ -25,7 +25,7 @@ $ mkdir src bin pkg
 $ export GOPATH="~/go"
 ```
 
-Download and install ``gofer``. The binary will be created as ``~/go/bin/gofer``.
+Download and install ``gofer``. The statically linked binary will be created as ``~/go/bin/gofer``.
 
 ```
 $ go get github.com/espebra/gofer
@@ -41,11 +41,13 @@ The built in help text will show the various command line arguments available:
 ~/go/bin/gofer --help
 ```
 
-Some arguments commonly used to start ``gofer`` are:
+The common way to start gofer is:
 
 ```
 ~/go/bin/gofer --config ~/gofer.json
 ```
+
+An example [systemd service script](systemd/gofer.service) is provided to make it easy to daemonize the bot and log to syslog.
 
 ## HTTP API interface
 

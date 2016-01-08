@@ -1,6 +1,12 @@
 # gofer
 
-Simple IRC bot written in Go, based on [thoj/go-ircevent](https://github.com/thoj/go-ircevent). It will listen for incoming HTTP requests and will relay the content onto IRC as specified.
+Simple IRC bot written in Go, based on [thoj/go-ircevent](https://github.com/thoj/go-ircevent). It will listen for incoming HTTP requests and relay the content onto IRC as specified. It will also execute commands based on messages in IRC channels and print back the result.
+
+## Table of contents
+
+* [Installation](#installation)
+* [HTTP API interface](#http-api-interface)
+* [Command execution](#command-execution)
 
 ## Installation
 

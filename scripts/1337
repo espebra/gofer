@@ -1,0 +1,119 @@
+#!/usr/bin/env python
+#
+# IRC 1337 game
+#
+# Rules:
+# * Empty line at 13:37 in the channel is plus one point for the nickname.
+# * Extra empty lines at 13:37 are minus one point each.
+# * Empty line outside 13:37 is minus one point.
+#
+
+import re
+import sys
+import datetime
+import sqlite3
+
+dbFile = '/var/tmp/1337.db'
+
+def createDB():
+	c = sqlite3.connect(dbFile)
+	try:
+		with c:
+			c.execute("CREATE TABLE events (registered text, nick text)")
+	except:
+		pass
+
+def register(dt, nick):
+	r = dt.strftime("%Y-%m-%d %H:%M:%S")
+	c = sqlite3.connect(dbFile)
+	with c:
+		c.execute("INSERT INTO events (registered, nick) values (?, ?)", (r, nick))
+
+def getNicks():
+	nicks = []
+	c = sqlite3.connect(dbFile)
+	with c:
+		cur = c.cursor()
+		cur.execute("SELECT DISTINCT nick FROM events")
+		rows = cur.fetchall()
+		for row in rows:
+			nicks.append(row[0])
+	return nicks
+
+def getScore(nick):
+	c = sqlite3.connect(dbFile)
+	score = 0
+	dates = {}
+	try:
+		with c:
+			cur = c.cursor()
+			cur.execute("SELECT registered FROM events WHERE nick=?", (nick,))
+			rows = cur.fetchall()
+			for row in rows:
+				t = row[0]
+				dt = datetime.datetime.strptime(t, "%Y-%m-%d %H:%M:%S")
+				hhmm = int(dt.strftime("%H%M"))
+				d = dt.strftime("%Y-%m-%d")
+
+				if not d in dates:
+					dates[d] = 0
+
+				if hhmm == 1337:
+					# Add one 1337 registration this date.
+					dates[d] += 1
+
+					if dates[d] == 1:
+						# Only score for the first registration each day.
+						score += 1
+					else:
+						# The other 1337 registrations get negative score.
+						score -= 1
+				else:
+					# Whitespace outside 1337 is not allowed. Negative score.
+					score -= 1
+	except:
+		pass
+	return score
+
+def scoreboard():
+	scoreboard = {}
+	nicks = getNicks()
+	for nick in nicks:
+		scoreboard[nick] = getScore(nick)
+	return scoreboard
+
+def main():
+	if len(sys.argv[1:]) != 2:
+		print "Wrong number of arguments"
+		sys.exit(1)
+	
+	nick = sys.argv[1]
+	message = sys.argv[2]
+	now = datetime.datetime.now()
+
+	# Just create the database already
+	createDB()
+
+	if re.match("^\s*$", message):
+		# Empty line
+		register(now, nick)
+	elif re.match("^score$", message):
+		# Print score of this nick
+		entries = scoreboard()
+		if not nick in entries:
+			print "No registrations for %s" % nick
+		else:
+			for index, s in enumerate(sorted(entries, key=entries.get, reverse=True)):
+				if nick == s:
+					print "[%d] %s: %s" % (index+1, s, entries[s])
+	elif re.match("^scoreboard$", message):
+		# Print scoreboard (top 10)
+		entries = scoreboard()
+		limit = 10
+		for index, s in enumerate(sorted(entries, key=entries.get, reverse=True)):
+			print "[%d] %s: %s" % (index+1, s, entries[s])
+			if index == 9:
+				break
+
+if __name__ == '__main__':
+	main()

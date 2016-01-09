@@ -27,7 +27,7 @@ type Configuration struct {
         Verbose			bool    
         Channels        	[]Channel
 	HTTP			HTTP
-        CommandDirectory	string  
+        ScriptDirectory		string  
 }
 
 func (c *Configuration) Read(path string) error {

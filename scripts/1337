@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 #
-# IRC 1337 game
+# Next generation stupid IRC game
 #
 # Rules:
-# * Empty line at 13:37 in the channel is plus one point for the nickname.
+# * Empty line at 13:37 in the channel is plus one point.
 # * Extra empty lines at 13:37 are minus one point each.
 # * Empty line outside 13:37 is minus one point.
-#
 
 import re
 import sys
@@ -97,16 +96,16 @@ def main():
 	if re.match("^\s*$", message):
 		# Empty line
 		register(now, nick)
-	elif re.match("^score$", message):
+	elif re.match("^My score\?$", message):
 		# Print score of this nick
 		entries = scoreboard()
 		if not nick in entries:
-			print "No registrations for %s" % nick
+			print "%s is no 1337." % nick
 		else:
 			for index, s in enumerate(sorted(entries, key=entries.get, reverse=True)):
 				if nick == s:
 					print "[%d] %s: %s" % (index+1, s, entries[s])
-	elif re.match("^scoreboard$", message):
+	elif re.match("^Top score\?$", message):
 		# Print scoreboard (top 10)
 		entries = scoreboard()
 		limit = 10
@@ -114,6 +113,11 @@ def main():
 			print "[%d] %s: %s" % (index+1, s, entries[s])
 			if index == 9:
 				break
+	elif re.match("^Help\?$", message):
+		print "** Help text for noobs **"
+		print "<Empty line>    One point plus or minus. It depends."
+		print "My score?       Your 1337 level."
+		print "Top score?      Top 10 1337 cheaters."
 
 if __name__ == '__main__':
 	main()

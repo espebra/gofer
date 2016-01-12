@@ -113,11 +113,17 @@ def main():
 			print "[%d] %s: %s" % (index+1, s, entries[s])
 			if index == 9:
 				break
+
+	elif re.match("^Reference time\?$", message):
+		r = now.strftime("%Y-%m-%d %H:%M:%S")
+		print "The absolutely correct time is %s" % r
+
 	elif re.match("^Help\?$", message):
 		print "** Help text for noobs **"
-		print "<Empty line>    One point plus or minus. It depends."
-		print "My score?       Your 1337 level."
-		print "Top score?      Top 10 1337 cheaters."
+		print "<Empty line>       One point plus or minus. It depends."
+		print "My score?          Your 1337 level."
+		print "Top score?         Top 10 1337 ppl."
+		print "Reference time?    This clock is the correct one."
 
 if __name__ == '__main__':
 	main()

@@ -18,15 +18,15 @@ def createDB():
 	c = sqlite3.connect(dbFile)
 	try:
 		with c:
-			c.execute("CREATE TABLE events (registered text, nick text)")
+			c.execute("CREATE TABLE events (registered text, nick text, message text)")
 	except:
 		pass
 
-def register(dt, nick):
+def register(dt, nick, message):
 	r = dt.strftime("%Y-%m-%d %H:%M:%S")
 	c = sqlite3.connect(dbFile)
 	with c:
-		c.execute("INSERT INTO events (registered, nick) values (?, ?)", (r, nick))
+		c.execute("INSERT INTO events (registered, nick, message) values (?, ?, ?)", (r, nick, message))
 
 def getNicks():
 	nicks = []
@@ -95,7 +95,7 @@ def main():
 
 	if re.match("^\s*$", message):
 		# Empty line
-		register(now, nick)
+		register(now, nick, message)
 	elif re.match("^My score\?$", message):
 		# Print score of this nick
 		entries = scoreboard()

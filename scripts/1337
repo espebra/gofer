@@ -46,26 +46,35 @@ def getScore(nick):
 	try:
 		with c:
 			cur = c.cursor()
-			cur.execute("SELECT registered FROM events WHERE nick=?", (nick,))
+			cur.execute("SELECT registered, message FROM events WHERE nick=?", (nick,))
 			rows = cur.fetchall()
 			for row in rows:
-				t = row[0]
-				dt = datetime.datetime.strptime(t, "%Y-%m-%d %H:%M:%S")
+				registered = row[0]
+				message = row[1]
+				dt = datetime.datetime.strptime(registered, "%Y-%m-%d %H:%M:%S")
 				hhmm = int(dt.strftime("%H%M"))
-				d = dt.strftime("%Y-%m-%d")
+				date = dt.strftime("%Y-%m-%d")
 
-				if not d in dates:
-					dates[d] = 0
+				if not date in dates:
+					dates[date] = 0
 
 				if hhmm == 1337:
 					# Add one 1337 registration this date.
-					dates[d] += 1
+					dates[date] += 1
 
-					if dates[d] == 1:
-						# Only score for the first registration each day.
-						score += 1
+					# Only accept empty lines
+					if re.match("^\s*$", message):
+						if dates[date] == 1:
+							# Only score for the first registration
+							# each day.
+							score += 1
+						else:
+							# The other 1337 registrations get
+							# negative score.
+							score -= 1
 					else:
-						# The other 1337 registrations get negative score.
+						# Proper messages in 1337 are not proper.
+						# Negative score.
 						score -= 1
 				else:
 					# Whitespace outside 1337 is not allowed. Negative score.
@@ -93,7 +102,10 @@ def main():
 	# Just create the database already
 	createDB()
 
-	if re.match("^\s*$", message):
+	if now.strftime("%H%M") == "1337":
+		# Non-empty line at 13:37
+		register(now, nick, message)
+	elif re.match("^\s*$", message):
 		# Empty line
 		register(now, nick, message)
 	elif re.match("^My score\?$", message):

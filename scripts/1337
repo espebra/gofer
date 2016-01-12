@@ -63,7 +63,7 @@ def getScore(nick):
 					dates[date] += 1
 
 					# Only accept empty lines
-					if re.match("^\s*$", message):
+					if re.match("^\ $", message):
 						if dates[date] == 1:
 							# Only score for the first registration
 							# each day.
@@ -105,7 +105,7 @@ def main():
 	if now.strftime("%H%M") == "1337":
 		# Non-empty line at 13:37
 		register(now, nick, message)
-	elif re.match("^\s*$", message):
+	elif re.match("^\ $", message):
 		# Empty line
 		register(now, nick, message)
 	elif re.match("^My score\?$", message):

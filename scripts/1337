@@ -126,6 +126,17 @@ def main():
 			if index == 9:
 				break
 
+	elif re.match("^Top score in binary\?$", message):
+		# Print scoreboard in binary (top 10, 10 bits)
+		entries = scoreboard()
+		limit = 10
+		maxnick = len(max(entries.keys(), key=len))
+		for index, s in enumerate(sorted(entries, key=entries.get, reverse=True)):
+			pad = ' ' * (maxnick - len(s) - len('%d' % (index+1)) + 1)
+			print "[%d] %s: %s%s" % (index+1, s, pad, format(entries[s], '010b'))
+			if index == 9:
+				break
+
 	elif re.match("^Reference time\?$", message):
 		r = now.strftime("%Y-%m-%d %H:%M:%S")
 		print "The absolutely correct time is %s" % r

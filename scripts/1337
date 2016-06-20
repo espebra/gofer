@@ -132,7 +132,7 @@ def main():
 		limit = 10
 		maxnick = len(max(entries.keys(), key=len))
 		for index, s in enumerate(sorted(entries, key=entries.get, reverse=True)):
-			pad = ' ' * (maxnick - len(s))
+			pad = ' ' * (maxnick - len(s) - len('%d' % (index+1)) + 1)
 			print "[%d] %s: %s%s" % (index+1, s, pad, format(entries[s], '010b'))
 			if index == 9:
 				break

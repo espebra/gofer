@@ -146,7 +146,7 @@ def main():
 		print "<Empty line>       	One point plus or minus. It depends."
 		print "My score?          	Your 1337 level."
 		print "Top score?         	Top 10 1337 ppl."
-		print "Top score in binary?	Top 10 1337 ppl in binary."	
+		print "Top score in binary?	Top 1010 1337 ppl in binary."	
 		print "Reference time?    	This clock is the correct one."
 
 if __name__ == '__main__':
